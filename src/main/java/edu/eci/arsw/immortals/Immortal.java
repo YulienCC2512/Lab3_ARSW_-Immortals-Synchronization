@@ -14,6 +14,7 @@ public final class Immortal implements Runnable {
   private final ScoreBoard scoreBoard;
   private final PauseController controller;
   private volatile boolean running = true;
+  private volatile boolean paused = false;
 
   public Immortal(String name, int health, int damage, List<Immortal> population, ScoreBoard scoreBoard, PauseController controller) {
     this.name = Objects.requireNonNull(name);
@@ -32,8 +33,13 @@ public final class Immortal implements Runnable {
   @Override public void run() {
     try {
       while (running) {
+        if (controller.paused()) paused = true;
         controller.awaitIfPaused();
-        controller.markPaused();
+
+
+
+        paused = false;
+
         if (!running) break;
         var opponent = pickOpponent();
         if (opponent == null) continue;
@@ -45,6 +51,10 @@ public final class Immortal implements Runnable {
     } catch (InterruptedException ie) {
       Thread.currentThread().interrupt();
     }
+  }
+
+  public boolean isPaused() {
+    return paused;
   }
 
   private Immortal pickOpponent() {
