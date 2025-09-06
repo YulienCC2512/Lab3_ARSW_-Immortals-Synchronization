@@ -92,10 +92,61 @@ Reescribe el **buscador de listas negras** para que la búsqueda **se detenga ta
 ---
 
 ## Parte III — (Avance) Sincronización y *Deadlocks* con *Highlander Simulator*
-1. Revisa la simulación: N inmortales; cada uno **ataca** a otro. El que ataca **resta M** al contrincante y **suma M/2** a su propia vida.  
+1. Revisa la simulación: N inmortales; cada uno **ataca** a otro. El que ataca **resta M** al contrincante y **suma M/2** a su propia vida.
 2. **Invariante**: con N y salud inicial `H`, la suma total debería permanecer constante (salvo durante un update). Calcula ese valor y úsalo para validar.  
-3. Ejecuta la UI y prueba **“Pause & Check”**. ¿Se cumple el invariante? Explica.  
+
+Dentro de la simulacion se crean N hilos (uno por inmortal) que pelean indefinidamente. En cada iteracion
+un inmortaal elige a otro al azar para iniciar una pelea.
+
+**Invariante:**
+- Dado N inmortales con salud inicial H, la suma total de salud debe ser:
+        
+    **Total = N * H**
+
+- Ese es el valor de referencia para la validacion de la simulacion, por lo tanto la suma deberia 
+  ser igual a Total en todo momento, salvo durante una pelea en curso.
+
+
+3. Ejecuta la UI y prueba **“Pause & Check”**. ¿Se cumple el invariante? Explica. 
+
+Resultado observado : N = 8, H = 100, Damage = 10. Total esperado = 800. 
+Luego de correr la simulacion y hacer click en "Pause & Check" se observa:
+
+```
+Total Health: 0
+Score (fights): 160
+```
+ **El invariante no se cumple**
+
+**Explicacion**: Durante cada pelea resta M al atacado y suma M / 2 al atacante. La variacion por pelea
+deberia ser de M/2. En este caso, con M = 10, indicando que se pierden 5 puntos de salud por pelea, por ende
+luego de 160 peleas la perdida deberia ser de 800 puntos de salud, lo que explica el resultado observado.
+
+Para garantizar este invariante:
+
+- Se cambió la lógica del ataque para que el inmortal atacante reciba exactamente lo que el otro pierde.
+- Se usa min(damage, health) al calcular el daño, de modo que nunca se reste más vida de la que el contrincante realmente tiene.
+- Esto evita que aparezcan valores negativos de salud y asegura que la suma total se conserve en cada paso.
+
+Modificaciones en los metodos de `fight` de la clase `Immortal`:
+
+
+```
+
+ if (this.health <= 0 || other.health <= 0) return;
+        int actualDamage = Math.min(other.health, this.damage);
+        other.health -= actualDamage;
+        this.health += actualDamage;
+        scoreBoard.recordFight();
+
+```
+
 4. **Pausa correcta**: asegura que **todos** los hilos queden pausados **antes** de leer/imprimir la salud; implementa **Resume** (ya disponible).  
+
+
+
+
+
 5. Haz *click* repetido y valida consistencia. ¿Se mantiene el invariante?  
 6. **Regiones críticas**: identifica y sincroniza las secciones de pelea para evitar carreras; si usas múltiples *locks*, anida con **orden consistente**:
    ```java

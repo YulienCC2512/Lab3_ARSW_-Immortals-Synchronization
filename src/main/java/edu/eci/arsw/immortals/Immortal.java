@@ -35,7 +35,11 @@ public final class Immortal implements Runnable {
       while (running) {
         if (controller.paused()) paused = true;
         controller.awaitIfPaused();
+
+
+
         paused = false;
+
         if (!running) break;
         var opponent = pickOpponent();
         if (opponent == null) continue;
@@ -66,8 +70,9 @@ public final class Immortal implements Runnable {
     synchronized (this) {
       synchronized (other) {
         if (this.health <= 0 || other.health <= 0) return;
-        other.health -= this.damage;
-        this.health += this.damage / 2;
+        int actualDamage = Math.min(other.health, this.damage);
+        other.health -= actualDamage;
+        this.health += actualDamage;
         scoreBoard.recordFight();
       }
     }
@@ -79,8 +84,9 @@ public final class Immortal implements Runnable {
     synchronized (first) {
       synchronized (second) {
         if (this.health <= 0 || other.health <= 0) return;
-        other.health -= this.damage;
-        this.health += this.damage / 2;
+        int actualDamage = Math.min(other.health, this.damage);
+        other.health -= actualDamage;
+        this.health += actualDamage;
         scoreBoard.recordFight();
       }
     }
