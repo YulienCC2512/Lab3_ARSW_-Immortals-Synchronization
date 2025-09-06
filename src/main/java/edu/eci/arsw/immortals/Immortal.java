@@ -35,11 +35,7 @@ public final class Immortal implements Runnable {
       while (running) {
         if (controller.paused()) paused = true;
         controller.awaitIfPaused();
-
-
-
         paused = false;
-
         if (!running) break;
         var opponent = pickOpponent();
         if (opponent == null) continue;

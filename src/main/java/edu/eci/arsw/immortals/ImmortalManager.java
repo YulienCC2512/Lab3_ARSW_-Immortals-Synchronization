@@ -63,9 +63,7 @@ public final class ImmortalManager implements AutoCloseable {
 
   public void pause() {
     controller.pause();
-    if (controller.allPaused()) {
-      ControllerFrame.getInstance().updateStats();
-    }
+   
   }
   public void resume() {
     controller.resume();

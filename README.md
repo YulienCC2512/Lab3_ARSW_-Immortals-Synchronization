@@ -146,7 +146,6 @@ Modificaciones en los metodos de `fight` de la clase `Immortal`:
 
 
 
-
 5. Haz *click* repetido y valida consistencia. ¿Se mantiene el invariante?  
 6. **Regiones críticas**: identifica y sincroniza las secciones de pelea para evitar carreras; si usas múltiples *locks*, anida con **orden consistente**:
    ```java
