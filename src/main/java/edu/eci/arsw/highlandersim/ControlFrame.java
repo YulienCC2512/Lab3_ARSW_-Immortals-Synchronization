@@ -74,12 +74,16 @@ public final class ControlFrame extends JFrame {
   }
 
   private void onPauseAndCheck(ActionEvent e) {
-    if (manager == null) return;
+    if (manager == null)
+      return;
     manager.pause();
     List<Immortal> pop = manager.populationSnapshot();
     long sum = 0;
     StringBuilder sb = new StringBuilder();
     for (Immortal im : pop) {
+      if (!im.isAlive()) {
+        continue;
+      }
       int h = im.getHealth();
       sum += h;
       sb.append(String.format("%-14s : %5d%n", im.name(), h));
