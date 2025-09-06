@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 
 public final class ControlFrame extends JFrame {
+  private final JLabel statusLabel = new JLabel("Estado: Listo");
+    private String state = "run";
 
   private ImmortalManager manager;
   private final JTextArea output = new JTextArea(14, 40);
@@ -38,6 +40,7 @@ public final class ControlFrame extends JFrame {
     top.add(new JLabel("Fight:"));
     fightMode.setSelectedItem(fight);
     top.add(fightMode);
+  top.add(statusLabel);
     add(top, BorderLayout.NORTH);
 
     output.setEditable(false);
@@ -76,6 +79,8 @@ public final class ControlFrame extends JFrame {
   private void onPauseAndCheck(ActionEvent e) {
     if (manager == null) return;
     manager.pause();
+    statusLabel.setText("Estado: Pausado");
+    state = "pause";
     List<Immortal> pop = manager.populationSnapshot();
     long sum = 0;
     StringBuilder sb = new StringBuilder();
@@ -87,12 +92,21 @@ public final class ControlFrame extends JFrame {
     sb.append("--------------------------------\n");
     sb.append("Total Health: ").append(sum).append('\n');
     sb.append("Score (fights): ").append(manager.scoreBoard().totalFights()).append('\n');
+    sb.append("state: ").append(state).append('\n');
     output.setText(sb.toString());
   }
 
   private void onResume(ActionEvent e) {
     if (manager == null) return;
     manager.resume();
+      statusLabel.setText("Estado: En ejecución");
+      state = "run";
+      // Actualizar el output para mostrar el nuevo estado si ya hay datos
+      String text = output.getText();
+      if (text.contains("state:")) {
+        text = text.replaceAll("state: \\w+", "state: " + state);
+        output.setText(text);
+      }
   }
 
   private void onStop(ActionEvent e) { safeStop(); }

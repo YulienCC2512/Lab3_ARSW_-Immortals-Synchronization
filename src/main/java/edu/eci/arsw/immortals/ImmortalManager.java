@@ -1,14 +1,14 @@
 
 package edu.eci.arsw.immortals;
 
-import edu.eci.arsw.concurrency.PauseController;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import edu.eci.arsw.concurrency.PauseController;
 
 
 public final class ImmortalManager implements AutoCloseable {
@@ -35,7 +35,6 @@ public final class ImmortalManager implements AutoCloseable {
     }
   }
   /**
-   * Espera hasta que todos los inmortales estén pausados (en awaitIfPaused).
    * Timeout simple de 2 segundos para evitar espera infinita.
    */
   public void waitAllPaused() throws InterruptedException {
@@ -63,7 +62,6 @@ public final class ImmortalManager implements AutoCloseable {
 
   public void pause() {
     controller.pause();
-   
   }
   public void resume() {
     controller.resume();

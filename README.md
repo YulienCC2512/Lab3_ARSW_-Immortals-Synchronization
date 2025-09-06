@@ -143,18 +143,48 @@ Modificaciones en los metodos de `fight` de la clase `Immortal`:
 
 4. **Pausa correcta**: asegura que **todos** los hilos queden pausados **antes** de leer/imprimir la salud; implementa **Resume** (ya disponible).  
 
+**Explicacion**: Usa una flag en paused desde la clase de PauseController para que los hilos consulten el estado del juego y de esta manera se sincronizan los hilos y se bloquean dependiendo del estado de la flag
+Es decir, el control de pausa se lleva a cabo de manera que los hilos solo se interrumpen en lugares seguros (antes de combatir) y se reanuda sin perder el estado.
 
+```
+while (running) {
+        if (controller.paused()) paused = true;
+        controller.awaitIfPaused();
+        paused = false;
+        if (!running) break;
+        var opponent = pickOpponent();
+        if (opponent == null) continue;
+        String mode = System.getProperty("fight", "ordered");
+        if ("naive".equalsIgnoreCase(mode)) fightNaive(opponent);
+        else fightOrdered(opponent);
+        Thread.sleep(2);
+      }
+```
 
+5. Haz *click* repetido y valida consistencia. ¿Se mantiene el invariante?
 
-5. Haz *click* repetido y valida consistencia. ¿Se mantiene el invariante?  
+**Observacion**: El sistema mantiene un curso optimo del juego y se sincroniza correctamente usando las opciones de pause y resume, las cuales se reflejan en el apartado de "state" que nos indica si el sistema esta pausado o corriendo, esto a partir de la flag implementada.
+asi mismo, la suma y el conteo de la vida se mantiene por debajo de la cifra especificada o hasta llegar a esta. Lo importante es que no se pase de dicho valor y que no se alteren cuando el juego este pausado.
+
+ ```
+
+this.health += actualDamage;
+if (this.health > 100) this.health = 100;
+
+ ```
+ ![Texto alternativo](images/Prueba1.png)
+|
 6. **Regiones críticas**: identifica y sincroniza las secciones de pelea para evitar carreras; si usas múltiples *locks*, anida con **orden consistente**:
-   ```java
+
+ ```
    synchronized (lockA) {
      synchronized (lockB) {
        // ...
      }
    }
    ```
+
+
 7. Si la app se **detiene** (posible *deadlock*), usa **`jps`** y **`jstack`** para diagnosticar.  
 8. Aplica una **estrategia** para corregir el *deadlock* (p. ej., **orden total** por nombre/id, o **`tryLock(timeout)`** con reintentos y *backoff*).  
 9. Valida con **N=100, 1000 o 10000** inmortales. Si falla el invariante, revisa la pausa y las regiones críticas.  
