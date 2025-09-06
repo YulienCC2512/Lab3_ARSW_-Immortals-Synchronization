@@ -3,7 +3,6 @@ package edu.eci.arsw.app;
 import edu.eci.arsw.demos.DeadlockDemo;
 import edu.eci.arsw.demos.OrderedTransferDemo;
 import edu.eci.arsw.demos.TryLockTransferDemo;
-
 public final class Main {
   private Main() {}
   public static void main(String[] args) throws Exception {
@@ -22,10 +21,11 @@ public final class Main {
         int n = Integer.getInteger("count", 8);
         String fight = System.getProperty("fight", "ordered");
         javax.swing.SwingUtilities.invokeLater(
-          () -> new edu.eci.arsw.highlandersim.ControlFrame(n, fight)
+                () -> new edu.eci.arsw.highlandersim.ControlFrame(n, fight)
         );
       }
       default -> System.out.println("Use -Dmode=immortals|demos|ui");
     }
   }
 }
+
