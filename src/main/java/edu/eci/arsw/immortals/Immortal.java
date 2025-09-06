@@ -1,10 +1,10 @@
 package edu.eci.arsw.immortals;
 
-import edu.eci.arsw.concurrency.PauseController;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+
+import edu.eci.arsw.concurrency.PauseController;
 
 public final class Immortal implements Runnable {
   private final String name;
@@ -69,11 +69,12 @@ public final class Immortal implements Runnable {
   private void fightNaive(Immortal other) {
     synchronized (this) {
       synchronized (other) {
-        if (this.health <= 0 || other.health <= 0) return;
-        int actualDamage = Math.min(other.health, this.damage);
-        other.health -= actualDamage;
-        this.health += actualDamage;
-        scoreBoard.recordFight();
+  if (this.health <= 0 || other.health <= 0) return;
+  int actualDamage = Math.min(other.health, this.damage);
+  other.health -= actualDamage;
+  this.health += actualDamage;
+  if (this.health > 100) this.health = 100;
+  scoreBoard.recordFight();
       }
     }
   }
@@ -83,11 +84,12 @@ public final class Immortal implements Runnable {
     Immortal second = this.name.compareTo(other.name) < 0 ? other : this;
     synchronized (first) {
       synchronized (second) {
-        if (this.health <= 0 || other.health <= 0) return;
-        int actualDamage = Math.min(other.health, this.damage);
-        other.health -= actualDamage;
-        this.health += actualDamage;
-        scoreBoard.recordFight();
+  if (this.health <= 0 || other.health <= 0) return;
+  int actualDamage = Math.min(other.health, this.damage);
+  other.health -= actualDamage;
+  this.health += actualDamage;
+  if (this.health > 100) this.health = 100;
+  scoreBoard.recordFight();
       }
     }
   }
