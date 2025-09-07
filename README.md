@@ -87,10 +87,12 @@ Reescribe el **buscador de listas negras** para que la búsqueda **se detenga ta
 - **Finalizar anticipadamente** (no recorrer servidores restantes) y **retornar** el resultado.  
 - Garantizar **ausencia de condiciones de carrera** sobre el contador compartido.
 
+> Puedes usar `AtomicInteger` o sincronización mínima sobre la región crítica del contador.
+
 ### Enlace asociado a la parte II
 https://github.com/YulienCC2512/Lab3_Part2_Threads_Blacklist_ElManesGerman.git
 
-> Puedes usar `AtomicInteger` o sincronización mínima sobre la región crítica del contador.
+
 
 ---
 
