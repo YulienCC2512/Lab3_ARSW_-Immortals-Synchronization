@@ -5,6 +5,7 @@ import edu.eci.arsw.concurrency.PauseController;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class Immortal implements Runnable {
   private final String name;
@@ -14,6 +15,7 @@ public final class Immortal implements Runnable {
   private final ScoreBoard scoreBoard;
   private final PauseController controller;
   private volatile boolean running = true;
+  private final ReentrantLock lock = new ReentrantLock();
 
   public Immortal(String name, int health, int damage, List<Immortal> population, ScoreBoard scoreBoard, PauseController controller) {
     this.name = Objects.requireNonNull(name);
@@ -29,21 +31,32 @@ public final class Immortal implements Runnable {
   public boolean isAlive() { return getHealth() > 0 && running; }
   public void stop() { running = false; }
 
-  @Override public void run() {
+  @Override
+  public void run() {
+    System.out.println("[ALIVE] " + name + " - Health: " + getHealth());
     try {
       while (running) {
         controller.awaitIfPaused();
-        if (!running) break;
+        if (!running)
+          break;
+        if (!isAlive()) {
+          System.out.println("[KILL] " + name + " - Health: " + getHealth());
+          break;
+        }
         var opponent = pickOpponent();
-        if (opponent == null) continue;
+        if (opponent == null)
+          continue;
         String mode = System.getProperty("fight", "ordered");
-        if ("naive".equalsIgnoreCase(mode)) fightNaive(opponent);
-        else fightOrdered(opponent);
+        if ("naive".equalsIgnoreCase(mode))
+          fightNaive(opponent);
+        else
+          fightOrdered(opponent);
         Thread.sleep(2);
       }
     } catch (InterruptedException ie) {
       Thread.currentThread().interrupt();
     }
+    System.out.println("[THREAD END] " + name + " has finished its execution");
   }
 
   private Immortal pickOpponent() {
@@ -56,12 +69,30 @@ public final class Immortal implements Runnable {
   }
 
   private void fightNaive(Immortal other) {
-    synchronized (this) {
-      synchronized (other) {
-        if (this.health <= 0 || other.health <= 0) return;
+    boolean thisLocked = false;
+    boolean otherLocked = false;
+    try {
+      thisLocked = this.lock.tryLock();
+      otherLocked = other.lock.tryLock();
+      if (thisLocked && otherLocked) {
+        if (this.health <= 0 || other.health <= 0) {
+          return;
+        }
         other.health -= this.damage;
         this.health += this.damage / 2;
         scoreBoard.recordFight();
+        if (other.health <= 0) {
+          System.out.println(other.name + " killed by " + this.name);
+        }
+      }
+    } catch (Exception e) {
+      System.err.println("Could not complete fight");
+    } finally {
+      if (otherLocked) {
+        other.lock.unlock();
+      }
+      if (thisLocked) {
+        this.lock.unlock();
       }
     }
   }
@@ -71,10 +102,15 @@ public final class Immortal implements Runnable {
     Immortal second = this.name.compareTo(other.name) < 0 ? other : this;
     synchronized (first) {
       synchronized (second) {
-        if (this.health <= 0 || other.health <= 0) return;
+        if (this.health <= 0 || other.health <= 0) {
+          return;
+        }
         other.health -= this.damage;
         this.health += this.damage / 2;
         scoreBoard.recordFight();
+        if (other.health <= 0) {
+          System.out.println(other.name + " killed by " + this.name);
+        }
       }
     }
   }
